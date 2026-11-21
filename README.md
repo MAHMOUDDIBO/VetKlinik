@@ -3,7 +3,7 @@
 **Öğrenci No:** G211210566  
 **Ad Soyad:** Mahmoud Almohamad Dibo  
 **Ders Grubu:** 2.A  
-**GitHub:**
+**GitHub:** https://github.com/MAHMOUDDIBO/VetKlinik
 
 ## Proje Hakkında
 

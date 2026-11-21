@@ -1,0 +1,13 @@
+﻿@model Hizmet
+
+<h1 class="h3">@Model.HizmetAdi</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Süre</dt>
+    <dd class="col-sm-9">@Model.SureDakika dakika</dd>
+
+    <dt class="col-sm-3">Ücret</dt>
+    <dd class="col-sm-9">@Model.Ucret.ToString("N2") ₺</dd>
+</dl>
+
+<a asp-action="Index">← Listeye dön</a>

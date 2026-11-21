@@ -1,0 +1,23 @@
+﻿@model List<Hizmet>
+
+<h1 class="h3 mb-3">Hizmetler</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Hizmet</th>
+            <th class="text-end">Süre</th>
+            <th class="text-end">Ücret</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var h in Model)
+        {
+            <tr>
+                <td><a asp-action="Detay" asp-route-id="@h.HizmetId">@h.HizmetAdi</a></td>
+                <td class="text-end">@h.SureDakika dk</td>
+                <td class="text-end">@h.Ucret.ToString("N2") ₺</td>
+            </tr>
+        }
+    </tbody>
+</table>
