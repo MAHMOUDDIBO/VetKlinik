@@ -1,0 +1,133 @@
+@model EvcilHayvan
+@{
+    var duzenleyebilir = (bool)ViewData["Duzenleyebilir"]!;
+    var personel = User.IsInRole(Roller.Admin) || User.IsInRole(Roller.Veteriner);
+    var bugun = DateTime.Today;
+    var asilar = Model.AsiKayitlari.OrderByDescending(a => a.YapildigiTarih).ToList();
+    var yaklasan = Model.AsiKayitlari.Where(a => a.SonrakiDozTarihi?.Date >= bugun).OrderBy(a => a.SonrakiDozTarihi).ToList();
+    var randevular = Model.Randevular.OrderByDescending(r => r.Baslangic).ToList();
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3 mb-0">@Model.EvcilHayvanAdi</h1>
+        <p class="text-muted mb-0">@Model.Tur · @Model.Irk · Sahibi: @Model.Sahip.AdSoyad</p>
+    </div>
+    <div class="text-nowrap">
+        @if (User.IsInRole(Roller.Uye) && duzenleyebilir)
+        {
+            <a asp-controller="Randevu" asp-action="Al" asp-route-hayvanId="@Model.EvcilHayvanId" class="btn btn-primary">Randevu al</a>
+        }
+        @if (duzenleyebilir)
+        {
+            <a asp-action="Duzenle" asp-route-id="@Model.EvcilHayvanId" class="btn btn-outline-secondary">Düzenle</a>
+            <a asp-action="Sil" asp-route-id="@Model.EvcilHayvanId" class="btn btn-outline-danger">Sil</a>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-6">Doğum tarihi</dt><dd class="col-6">@Model.DogumTarihi.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-6">Kilo</dt><dd class="col-6">@Model.Kilo.ToString("0.##") kg</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-body">
+                <h2 class="h6">Yaklaşan aşılar</h2>
+                @if (yaklasan.Count == 0)
+                {
+                    <p class="text-muted small mb-0">Yaklaşan aşı yok.</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var a in yaklasan)
+                        {
+                            var kalan = (a.SonrakiDozTarihi!.Value.Date - bugun).Days;
+                            <li class="mb-1">
+                                <strong>@a.AsiAdi</strong> — @a.SonrakiDozTarihi.Value.ToString("dd.MM.yyyy")
+                                <span class="badge @(kalan <= 30 ? "bg-warning text-dark" : "bg-light text-dark border")">@(kalan == 0 ? "bugün" : kalan + " gün")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-2">Aşı geçmişi</h2>
+            @if (personel)
+            {
+                <a asp-controller="Asi" asp-action="Ekle" asp-route-id="@Model.EvcilHayvanId" class="btn btn-sm btn-outline-primary">+ Aşı ekle</a>
+            }
+        </div>
+        @if (asilar.Count == 0)
+        {
+            <p class="text-muted">Aşı kaydı yok.</p>
+        }
+        else
+        {
+            <table class="table table-sm align-middle">
+                <thead><tr><th>Aşı</th><th>Yapıldığı tarih</th><th>Sonraki doz</th>@if (personel) { <th></th> }</tr></thead>
+                <tbody>
+                    @foreach (var a in asilar)
+                    {
+                        var gecikti = a.SonrakiDozTarihi is not null && a.SonrakiDozTarihi.Value.Date < bugun;
+                        <tr>
+                            <td>@a.AsiAdi</td>
+                            <td>@a.YapildigiTarih.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @(a.SonrakiDozTarihi?.ToString("dd.MM.yyyy") ?? "—")
+                                @if (gecikti) { <span class="badge bg-danger ms-1">gecikti</span> }
+                            </td>
+                            @if (personel)
+                            {
+                                <td class="text-end text-nowrap">
+                                    <a asp-controller="Asi" asp-action="Duzenle" asp-route-id="@a.AsiKaydiId" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                                    <form asp-controller="Asi" asp-action="Sil" asp-route-id="@a.AsiKaydiId" method="post" class="d-inline"
+                                          onsubmit="return confirm('Aşı kaydı silinsin mi?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <h2 class="h5 mt-4 mb-2">Randevular ve muayene notları</h2>
+        @if (randevular.Count == 0)
+        {
+            <p class="text-muted">Randevu yok.</p>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var r in randevular)
+                {
+                    <a asp-controller="Randevu" asp-action="Detay" asp-route-id="@r.RandevuId" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between">
+                            <span><strong>@r.Baslangic.ToString("dd.MM.yyyy HH:mm")</strong> · @r.Hizmet.HizmetAdi · @r.Veteriner.VeterinerAdSoyad</span>
+                            <partial name="_DurumRozeti" model="r.Durum" />
+                        </div>
+                        @if (!string.IsNullOrEmpty(r.MuayeneNotu))
+                        {
+                            <div class="small text-muted mt-1">📝 @r.MuayeneNotu</div>
+                        }
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<p class="mt-4"><a asp-action="Index" class="btn btn-link px-0">← Listeye dön</a></p>

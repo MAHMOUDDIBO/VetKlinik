@@ -1,0 +1,23 @@
+@model List<(Kullanici Kullanici, IList<string> Roller)>
+
+<h1 class="h3 mb-3">Kullanıcılar</h1>
+
+<table class="table table-striped align-middle">
+    <thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Rol</th><th>MCP anahtarı</th></tr></thead>
+    <tbody>
+        @foreach (var (k, roller) in Model)
+        {
+            <tr>
+                <td>@k.AdSoyad</td>
+                <td>@k.Email</td>
+                <td>
+                    @foreach (var r in roller)
+                    {
+                        <span class="badge @(r == Roller.Admin ? "bg-danger" : r == Roller.Veteriner ? "bg-primary" : "bg-secondary")">@r</span>
+                    }
+                </td>
+                <td>@(k.ApiAnahtariOzeti is null ? "—" : "var")</td>
+            </tr>
+        }
+    </tbody>
+</table>

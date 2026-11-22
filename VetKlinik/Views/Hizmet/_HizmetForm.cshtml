@@ -1,0 +1,22 @@
+@* Ekle ve Düzenle'nin ORTAK alanları *@
+@model HizmetFormVM
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+<div class="mb-3">
+    <label asp-for="HizmetAdi" class="form-label"></label>
+    <input asp-for="HizmetAdi" class="form-control" />
+    <span asp-validation-for="HizmetAdi" class="small"></span>
+</div>
+<div class="row">
+    <div class="col-sm-6 mb-3">
+        <label asp-for="SureDakika" class="form-label"></label>
+        <input asp-for="SureDakika" class="form-control" />
+        <span asp-validation-for="SureDakika" class="small"></span>
+    </div>
+    <div class="col-sm-6 mb-3">
+        <label asp-for="Ucret" class="form-label"></label>
+        <input asp-for="Ucret" class="form-control" placeholder="Örn: 1.250,50" />
+        <span asp-validation-for="Ucret" class="small"></span>
+    </div>
+</div>

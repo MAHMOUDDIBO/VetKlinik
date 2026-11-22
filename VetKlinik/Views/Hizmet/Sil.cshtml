@@ -1,0 +1,13 @@
+@model Hizmet
+
+<h1 class="h3">Hizmet sil</h1>
+
+<div class="alert alert-warning">
+    <strong>@Model.HizmetAdi</strong> (@Model.SureDakika dk, @Model.Ucret.ToString("N2") ₺) silinecek. Emin misiniz?
+    <div class="small mt-1">Bu hizmete ait randevu varsa silme işlemi reddedilir.</div>
+</div>
+
+<form asp-action="Sil" asp-route-id="@Model.HizmetId" method="post">
+    <button type="submit" class="btn btn-danger">Evet, sil</button>
+    <a asp-action="Index" class="btn btn-link">Vazgeç</a>
+</form>

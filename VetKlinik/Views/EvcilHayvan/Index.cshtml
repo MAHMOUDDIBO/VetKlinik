@@ -1,0 +1,54 @@
+@model List<EvcilHayvan>
+@{
+    var uye = User.IsInRole(Roller.Uye);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+    @if (uye)
+    {
+        <a asp-action="Ekle" class="btn btn-primary">+ Evcil hayvan ekle</a>
+    }
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center py-5 text-muted">
+        <div style="font-size:3rem">🐾</div>
+        <p>Henüz kayıtlı evcil hayvan yok.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Adı</th><th>Tür / Irk</th><th>Yaş</th><th class="text-end">Kilo</th>
+                    @if (!uye) { <th>Sahibi</th> }
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model)
+                {
+                    var yas = DateTime.Today.Year - h.DogumTarihi.Year - (DateTime.Today.DayOfYear < h.DogumTarihi.DayOfYear ? 1 : 0);
+                    <tr>
+                        <td><a asp-action="Detay" asp-route-id="@h.EvcilHayvanId" class="fw-semibold">@h.EvcilHayvanAdi</a></td>
+                        <td>@h.Tur <span class="text-muted">@h.Irk</span></td>
+                        <td>@(yas < 1 ? "1 yaşından küçük" : yas + " yaş")</td>
+                        <td class="text-end">@h.Kilo.ToString("0.##") kg</td>
+                        @if (!uye) { <td>@h.Sahip.AdSoyad</td> }
+                        <td class="text-end text-nowrap">
+                            @if (uye)
+                            {
+                                <a asp-controller="Randevu" asp-action="Al" asp-route-hayvanId="@h.EvcilHayvanId" class="btn btn-sm btn-primary">Randevu al</a>
+                            }
+                            <a asp-action="Detay" asp-route-id="@h.EvcilHayvanId" class="btn btn-sm btn-outline-secondary">Detay</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

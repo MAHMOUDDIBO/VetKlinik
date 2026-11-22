@@ -1,23 +1,47 @@
-﻿@model List<Hizmet>
+@model List<Hizmet>
+@{
+    var admin = User.IsInRole(Roller.Admin);
+}
 
-<h1 class="h3 mb-3">Hizmetler</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Hizmetler</h1>
+    @if (admin)
+    {
+        <a asp-action="Ekle" class="btn btn-primary">+ Yeni hizmet</a>
+    }
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Hizmet</th>
-            <th class="text-end">Süre</th>
-            <th class="text-end">Ücret</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var h in Model)
-        {
+@if (Model.Count == 0)
+{
+    <p class="text-muted">Henüz hizmet tanımlanmadı.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
             <tr>
-                <td><a asp-action="Detay" asp-route-id="@h.HizmetId">@h.HizmetAdi</a></td>
-                <td class="text-end">@h.SureDakika dk</td>
-                <td class="text-end">@h.Ucret.ToString("N2") ₺</td>
+                <th>Hizmet</th>
+                <th class="text-end">Süre</th>
+                <th class="text-end">Ücret</th>
+                @if (admin) { <th></th> }
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var h in Model)
+            {
+                <tr>
+                    <td><a asp-action="Detay" asp-route-id="@h.HizmetId">@h.HizmetAdi</a></td>
+                    <td class="text-end">@h.SureDakika dk</td>
+                    <td class="text-end">@h.Ucret.ToString("N2") ₺</td>
+                    @if (admin)
+                    {
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Duzenle" asp-route-id="@h.HizmetId" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                            <a asp-action="Sil" asp-route-id="@h.HizmetId" class="btn btn-sm btn-outline-danger">Sil</a>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}

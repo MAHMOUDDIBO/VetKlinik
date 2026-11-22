@@ -1,0 +1,13 @@
+@model HizmetFormVM
+
+<h1 class="h3">Hizmet ekle</h1>
+
+<form asp-action="Ekle" method="post" class="col-lg-6">
+    <partial name="_HizmetForm" model="Model" />
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-link">Vazgeç</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

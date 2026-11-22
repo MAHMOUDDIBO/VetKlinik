@@ -1,0 +1,103 @@
+@model Randevu
+@{
+    var yonetebilir = (bool)ViewData["Yonetebilir"]!;
+    var sahibi = (bool)ViewData["Sahibi"]!;
+    var gelecekte = Model.Baslangic > DateTime.Now;
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <h1 class="h3 mb-0">Randevu #@Model.RandevuId <partial name="_DurumRozeti" model="Model.Durum" /></h1>
+    <a asp-action="Index" class="btn btn-link">← Randevular</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Tarih</dt>
+                    <dd class="col-sm-8">@Model.Baslangic.ToString("dd MMMM yyyy, dddd")</dd>
+                    <dt class="col-sm-4">Saat</dt>
+                    <dd class="col-sm-8">@Model.Baslangic.ToString("HH:mm") – @Model.Bitis.ToString("HH:mm") (@Model.SureDakika dk)</dd>
+                    <dt class="col-sm-4">Evcil hayvan</dt>
+                    <dd class="col-sm-8"><a asp-controller="EvcilHayvan" asp-action="Detay" asp-route-id="@Model.EvcilHayvanId">@Model.EvcilHayvan.EvcilHayvanAdi</a> (@Model.EvcilHayvan.Tur)</dd>
+                    <dt class="col-sm-4">Sahibi</dt>
+                    <dd class="col-sm-8">@Model.EvcilHayvan.Sahip.AdSoyad</dd>
+                    <dt class="col-sm-4">Hizmet</dt>
+                    <dd class="col-sm-8">@Model.Hizmet.HizmetAdi</dd>
+                    <dt class="col-sm-4">Hekim</dt>
+                    <dd class="col-sm-8"><a asp-controller="Veteriner" asp-action="Detay" asp-route-id="@Model.VeterinerId">@Model.Veteriner.VeterinerAdSoyad</a></dd>
+                    <dt class="col-sm-4">Ücret</dt>
+                    <dd class="col-sm-8">@Model.Ucret.ToString("N2") ₺ <span class="text-muted small">(randevu anındaki fiyat)</span></dd>
+                    <dt class="col-sm-4">Oluşturulma</dt>
+                    <dd class="col-sm-8 text-muted">@Model.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.MuayeneNotu))
+        {
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h2 class="h6">📝 Muayene notu</h2>
+                    <p class="mb-0" style="white-space:pre-line">@Model.MuayeneNotu</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card bg-light border-0">
+            <div class="card-body d-grid gap-2">
+                <h2 class="h6">İşlemler</h2>
+
+                @if (yonetebilir && Model.Durum == RandevuDurumu.Bekliyor)
+                {
+                    <form asp-action="Onayla" asp-route-id="@Model.RandevuId" method="post" class="d-grid">
+                        <button type="submit" class="btn btn-success">✓ Onayla</button>
+                    </form>
+                    <form asp-action="Reddet" asp-route-id="@Model.RandevuId" method="post" class="d-grid">
+                        <button type="submit" class="btn btn-outline-danger">✗ Reddet</button>
+                    </form>
+                }
+
+                @if (yonetebilir && (Model.Durum == RandevuDurumu.Onaylandi || Model.Durum == RandevuDurumu.Tamamlandi) && !gelecekte)
+                {
+                    <a asp-action="Tamamla" asp-route-id="@Model.RandevuId" class="btn btn-primary">
+                        @(Model.Durum == RandevuDurumu.Tamamlandi ? "Muayene notunu düzenle" : "Muayene notu gir ve tamamla")
+                    </a>
+                }
+                else if (yonetebilir && Model.Durum == RandevuDurumu.Onaylandi)
+                {
+                    <p class="small text-muted mb-0">Muayene notu randevu saatinden sonra girilebilir.</p>
+                }
+
+                @if (sahibi && Model.Durum == RandevuDurumu.Bekliyor)
+                {
+                    <a asp-action="Duzenle" asp-route-id="@Model.RandevuId" class="btn btn-outline-secondary">Tarih/saat değiştir</a>
+                }
+
+                @if (sahibi && gelecekte && (Model.Durum == RandevuDurumu.Bekliyor || Model.Durum == RandevuDurumu.Onaylandi))
+                {
+                    <form asp-action="Iptal" asp-route-id="@Model.RandevuId" method="post" class="d-grid"
+                          onsubmit="return confirm('Randevu iptal edilsin mi?');">
+                        <button type="submit" class="btn btn-outline-warning">Randevuyu iptal et</button>
+                    </form>
+                }
+
+                @if (User.IsInRole(Roller.Admin))
+                {
+                    <form asp-action="Sil" asp-route-id="@Model.RandevuId" method="post" class="d-grid"
+                          onsubmit="return confirm('Randevu kalıcı olarak silinsin mi?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Kaydı sil (admin)</button>
+                    </form>
+                }
+
+                @if (Model.Durum == RandevuDurumu.Bekliyor && !yonetebilir)
+                {
+                    <p class="small text-muted mb-0">Randevunuz hekim onayı bekliyor.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

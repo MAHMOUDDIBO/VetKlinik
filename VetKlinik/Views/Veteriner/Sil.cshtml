@@ -1,0 +1,13 @@
+@model Veteriner
+
+<h1 class="h3">Hekim sil</h1>
+
+<div class="alert alert-warning">
+    <strong>@Model.VeterinerAdSoyad</strong> ve giriş hesabı silinecek. Emin misiniz?
+    <div class="small mt-1">Hekimin randevu geçmişi varsa silme işlemi reddedilir.</div>
+</div>
+
+<form asp-action="Sil" asp-route-id="@Model.VeterinerId" method="post">
+    <button type="submit" class="btn btn-danger">Evet, sil</button>
+    <a asp-action="Detay" asp-route-id="@Model.VeterinerId" class="btn btn-link">Vazgeç</a>
+</form>

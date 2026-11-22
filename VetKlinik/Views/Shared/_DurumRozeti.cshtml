@@ -1,0 +1,13 @@
+@model RandevuDurumu
+@{
+    var (renk, metin) = Model switch
+    {
+        RandevuDurumu.Bekliyor => ("warning text-dark", "Bekliyor"),
+        RandevuDurumu.Onaylandi => ("primary", "Onaylandı"),
+        RandevuDurumu.Reddedildi => ("danger", "Reddedildi"),
+        RandevuDurumu.Tamamlandi => ("success", "Tamamlandı"),
+        RandevuDurumu.IptalEdildi => ("secondary", "İptal edildi"),
+        _ => ("light", Model.ToString())
+    };
+}
+<span class="badge bg-@renk">@metin</span>

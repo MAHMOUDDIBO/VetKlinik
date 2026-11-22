@@ -1,8 +1,58 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model List<Hizmet>
+@{
+    var hekimler = (List<Veteriner>)ViewData["Veterinerler"]!;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<section class="hero mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <h1 class="display-6 fw-semibold">Dostunuzun sağlığı, tek tıkla randevu.</h1>
+            <p class="lead text-muted">Hekimlerimizin boş saatlerini görün, evcil hayvanınız için randevu alın,
+                aşı takvimini kaçırmayın.</p>
+            @if (User.IsInRole(Roller.Uye))
+            {
+                <a asp-controller="Randevu" asp-action="Al" class="btn btn-primary btn-lg">Randevu al</a>
+                <a asp-controller="EvcilHayvan" asp-action="Index" class="btn btn-outline-primary btn-lg ms-2">Hayvanlarım</a>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <a asp-controller="Hesap" asp-action="Kayit" class="btn btn-primary btn-lg">Hemen üye ol</a>
+                <a asp-controller="Hesap" asp-action="Giris" class="btn btn-outline-primary btn-lg ms-2">Giriş yap</a>
+            }
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block" style="font-size:7rem">🐶🐱</div>
+    </div>
+</section>
+
+<h2 class="h4 mb-3">Hizmetlerimiz</h2>
+<div class="row g-3 mb-5">
+    @foreach (var h in Model)
+    {
+        <div class="col-sm-6 col-lg-4">
+            <div class="card kart-hizmet h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="h5 card-title">@h.HizmetAdi</h3>
+                    <p class="card-text text-muted mb-0">⏱ @h.SureDakika dakika · <strong>@h.Ucret.ToString("N2") ₺</strong></p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<h2 class="h4 mb-3">Hekimlerimiz</h2>
+<div class="row g-3">
+    @foreach (var v in hekimler)
+    {
+        <div class="col-sm-6 col-lg-4">
+            <a asp-controller="Veteriner" asp-action="Detay" asp-route-id="@v.VeterinerId" class="text-decoration-none text-reset">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h3 class="h5 card-title mb-1">Vet. Hek. @v.VeterinerAdSoyad</h3>
+                        <p class="text-klinik small mb-2">@v.UzmanAlani</p>
+                        <p class="small text-muted mb-0">@string.Join(" · ", v.Hizmetler.Select(x => x.HizmetAdi))</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
 </div>

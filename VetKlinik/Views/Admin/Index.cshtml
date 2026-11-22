@@ -1,0 +1,118 @@
+@{
+    var ozet = (PanelOzeti)ViewData["Ozet"]!;
+    var rapor = (List<HizmetRaporSatiri>)ViewData["Rapor"]!;
+    var bekleyenler = (List<Randevu>)ViewData["Bekleyenler"]!;
+    var kutular = new (string Ad, int Sayi)[]
+    {
+        ("Bekleyen randevu", ozet.BekleyenRandevu), ("Bugünkü randevu", ozet.BugunkuRandevu),
+        ("Hekim", ozet.HekimSayisi), ("Hizmet", ozet.HizmetSayisi),
+        ("Üye", ozet.UyeSayisi), ("Evcil hayvan", ozet.HayvanSayisi)
+    };
+}
+
+<h1 class="h3 mb-4">Yönetim Paneli</h1>
+
+<div class="row g-3 mb-4">
+    @foreach (var k in kutular)
+    {
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card ozet-kutu shadow-sm h-100">
+                <div class="card-body py-3">
+                    <div class="sayi">@k.Sayi</div>
+                    <div class="small text-muted">@k.Ad</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a asp-controller="Hizmet" asp-action="Index" class="btn btn-outline-primary">Hizmetleri yönet</a>
+    <a asp-controller="Veteriner" asp-action="Index" class="btn btn-outline-primary">Hekimleri yönet</a>
+    <a asp-controller="Randevu" asp-action="Index" class="btn btn-outline-primary">Tüm randevular</a>
+    <a asp-controller="EvcilHayvan" asp-action="Index" class="btn btn-outline-primary">Tüm hastalar</a>
+    <a asp-action="Kullanicilar" class="btn btn-outline-primary">Kullanıcılar</a>
+</div>
+
+<h2 class="h5">Onay bekleyen randevular (@bekleyenler.Count)</h2>
+@if (bekleyenler.Count == 0)
+{
+    <p class="text-muted">Onay bekleyen randevu yok.</p>
+}
+else
+{
+    <div class="table-responsive mb-4">
+        <table class="table table-sm align-middle">
+            <thead class="table-light"><tr><th>Tarih</th><th>Hayvan</th><th>Hizmet</th><th>Hekim</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var r in bekleyenler.OrderBy(r => r.Baslangic))
+                {
+                    <tr>
+                        <td>@r.Baslangic.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@r.EvcilHayvan.EvcilHayvanAdi <span class="text-muted small">(@r.EvcilHayvan.Sahip.AdSoyad)</span></td>
+                        <td>@r.Hizmet.HizmetAdi</td>
+                        <td>@r.Veteriner.VeterinerAdSoyad</td>
+                        <td class="text-end text-nowrap">
+                            <form asp-controller="Randevu" asp-action="Onayla" asp-route-id="@r.RandevuId" asp-route-donus="/Admin" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Onayla</button>
+                            </form>
+                            <form asp-controller="Randevu" asp-action="Reddet" asp-route-id="@r.RandevuId" asp-route-donus="/Admin" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Reddet</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<h2 class="h5">Hizmet türüne göre randevu ve ciro raporu</h2>
+<form method="get" asp-action="Index" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label small" for="baslangic">Başlangıç</label>
+        <input type="date" id="baslangic" name="baslangic" value="@ViewData["Baslangic"]" class="form-control form-control-sm" />
+    </div>
+    <div class="col-auto">
+        <label class="form-label small" for="bitis">Bitiş</label>
+        <input type="date" id="bitis" name="bitis" value="@ViewData["Bitis"]" class="form-control form-control-sm" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Filtrele</button>
+        <a asp-action="Index" class="btn btn-sm btn-link">Temizle</a>
+    </div>
+</form>
+
+@if (rapor.Count == 0)
+{
+    <p class="text-muted">Seçilen aralıkta randevu yok.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Hizmet</th><th class="text-end">Randevu</th><th class="text-end">Tamamlanan</th><th class="text-end">Ciro</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var s in rapor)
+            {
+                <tr>
+                    <td>@s.HizmetAdi</td>
+                    <td class="text-end">@s.RandevuSayisi</td>
+                    <td class="text-end">@s.TamamlananSayisi</td>
+                    <td class="text-end">@s.Ciro.ToString("N2") ₺</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="fw-semibold">
+            <tr>
+                <td>Toplam</td>
+                <td class="text-end">@rapor.Sum(s => s.RandevuSayisi)</td>
+                <td class="text-end">@rapor.Sum(s => s.TamamlananSayisi)</td>
+                <td class="text-end">@rapor.Sum(s => s.Ciro).ToString("N2") ₺</td>
+            </tr>
+        </tfoot>
+    </table>
+    <p class="small text-muted">Ciro yalnızca tamamlanan randevulardan hesaplanır; reddedilen ve iptal edilenler sayılmaz.
+        Aynı rapor JSON olarak: <code>GET /api/raporlar/hizmet</code></p>
+}

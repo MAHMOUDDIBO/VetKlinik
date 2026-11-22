@@ -1,18 +1,31 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using VetKlinik.Models;
+using VetKlinik.Services;
 
 namespace VetKlinik.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IHizmetServisi _hizmetler;
+        private readonly IVeterinerServisi _veterinerler;
+
+        public HomeController(IHizmetServisi hizmetler, IVeterinerServisi veterinerler)
         {
-            return View();
+            _hizmetler = hizmetler;
+            _veterinerler = veterinerler;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            ViewData["Title"] = "Ana Sayfa";
+            ViewData["Veterinerler"] = await _veterinerler.ListeleAsync();
+            return View(await _hizmetler.ListeleAsync());
         }
 
         public IActionResult Privacy()
         {
+            ViewData["Title"] = "Gizlilik";
             return View();
         }
 

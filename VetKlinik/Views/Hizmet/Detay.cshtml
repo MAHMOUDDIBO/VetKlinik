@@ -1,4 +1,4 @@
-﻿@model Hizmet
+@model Hizmet
 
 <h1 class="h3">@Model.HizmetAdi</h1>
 
@@ -8,6 +8,29 @@
 
     <dt class="col-sm-3">Ücret</dt>
     <dd class="col-sm-9">@Model.Ucret.ToString("N2") ₺</dd>
+
+    <dt class="col-sm-3">Bu hizmeti veren hekimler</dt>
+    <dd class="col-sm-9">
+        @if (Model.Veterinerler.Count == 0)
+        {
+            <span class="text-muted">Henüz atanmadı.</span>
+        }
+        else
+        {
+            @foreach (var v in Model.Veterinerler.OrderBy(v => v.VeterinerAdSoyad))
+            {
+                <a asp-controller="Veteriner" asp-action="Detay" asp-route-id="@v.VeterinerId" class="badge bg-light text-dark border me-1">@v.VeterinerAdSoyad</a>
+            }
+        }
+    </dd>
 </dl>
 
-<a asp-action="Index">← Listeye dön</a>
+@if (User.IsInRole(Roller.Admin))
+{
+    <a asp-action="Duzenle" asp-route-id="@Model.HizmetId" class="btn btn-outline-secondary">Düzenle</a>
+}
+@if (User.IsInRole(Roller.Uye))
+{
+    <a asp-controller="Randevu" asp-action="Al" class="btn btn-primary">Randevu al</a>
+}
+<a asp-action="Index" class="btn btn-link">← Listeye dön</a>

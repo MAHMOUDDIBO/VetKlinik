@@ -1,0 +1,16 @@
+@model AsiFormVM
+@{
+    var hayvan = (EvcilHayvan)ViewData["Hayvan"]!;
+}
+
+<h1 class="h3">Aşı düzenle <small class="text-muted fs-5">— @hayvan.EvcilHayvanAdi</small></h1>
+
+<form asp-action="Duzenle" asp-route-id="@ViewContext.RouteData.Values["id"]" method="post" class="col-lg-7">
+    <partial name="_AsiForm" model="Model" />
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-controller="EvcilHayvan" asp-action="Detay" asp-route-id="@hayvan.EvcilHayvanId" class="btn btn-link">Vazgeç</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,54 +1,92 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - VetKlinik</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] — VetKlinik</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/VetKlinik.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/klinik.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">VetKlinik</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-klinik shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">🐾 VetKlinik</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#anaMenu"
+                        aria-controls="anaMenu" aria-expanded="false" aria-label="Menüyü aç">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                <div class="collapse navbar-collapse" id="anaMenu">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Hizmet" asp-action="Index">Hizmetler</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Veteriner" asp-action="Index">Hekimler</a></li>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Hizmet" asp-action="Index">Hizmetler</a>
-                        </li>
+                        @if (User.IsInRole(Roller.Uye))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="EvcilHayvan" asp-action="Index">Hayvanlarım</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Randevu" asp-action="Index">Randevularım</a></li>
+                            <li class="nav-item"><a class="nav-link fw-semibold" asp-controller="Randevu" asp-action="Al">+ Randevu al</a></li>
+                        }
+                        @if (User.IsInRole(Roller.Veteriner))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Randevu" asp-action="Index" asp-route-durum="Bekliyor">Onay bekleyenler</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Randevu" asp-action="Index">Randevularım</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="EvcilHayvan" asp-action="Index">Hastalar</a></li>
+                        }
+                        @if (User.IsInRole(Roller.Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Yönetim</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Panel ve rapor</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Randevu" asp-action="Index">Tüm randevular</a></li>
+                                    <li><a class="dropdown-item" asp-controller="EvcilHayvan" asp-action="Index">Tüm hastalar</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Hizmet" asp-action="Ekle">Hizmet ekle</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Veteriner" asp-action="Ekle">Hekim ekle</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Kullanicilar">Kullanıcılar</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Hesap" asp-action="Profil">👤 @User.AdSoyad()</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Hesap" asp-action="Cikis" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-link nav-link">Çıkış</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Hesap" asp-action="Giris">Giriş</a></li>
+                            <li class="nav-item"><a class="btn btn-light btn-sm ms-lg-2 mt-1" asp-controller="Hesap" asp-action="Kayit">Üye ol</a></li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 1448 - VetKlinik - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main class="container my-4 flex-grow-1">
+        <partial name="_Mesajlar" />
+        @RenderBody()
+    </main>
+
+    <footer class="border-top py-3 text-muted small">
+        <div class="container d-flex justify-content-between">
+            <span>&copy; @DateTime.Now.Year VetKlinik — Veteriner Kliniği Randevu ve Hasta Takip Sistemi</span>
+            <a asp-controller="Home" asp-action="Privacy" class="text-muted">Gizlilik</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

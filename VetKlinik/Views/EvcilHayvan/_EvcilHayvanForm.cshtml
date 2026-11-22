@@ -1,0 +1,35 @@
+@model EvcilHayvanFormVM
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+<div class="row">
+    <div class="col-sm-6 mb-3">
+        <label asp-for="EvcilHayvanAdi" class="form-label"></label>
+        <input asp-for="EvcilHayvanAdi" class="form-control" />
+        <span asp-validation-for="EvcilHayvanAdi" class="small"></span>
+    </div>
+    <div class="col-sm-6 mb-3">
+        <label asp-for="Tur" class="form-label"></label>
+        <select asp-for="Tur" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(EvcilHayvanFormVM.Turler))" class="form-select">
+            <option value="">— seçin —</option>
+        </select>
+        <span asp-validation-for="Tur" class="small"></span>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="Irk" class="form-label"></label>
+    <input asp-for="Irk" class="form-control" />
+    <span asp-validation-for="Irk" class="small"></span>
+</div>
+<div class="row">
+    <div class="col-sm-6 mb-3">
+        <label asp-for="DogumTarihi" class="form-label"></label>
+        <input asp-for="DogumTarihi" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="DogumTarihi" class="small"></span>
+    </div>
+    <div class="col-sm-6 mb-3">
+        <label asp-for="Kilo" class="form-label"></label>
+        <input asp-for="Kilo" class="form-control" placeholder="Örn: 4,5" />
+        <span asp-validation-for="Kilo" class="small"></span>
+    </div>
+</div>

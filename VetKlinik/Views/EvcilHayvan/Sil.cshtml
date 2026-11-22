@@ -1,0 +1,13 @@
+@model EvcilHayvan
+
+<h1 class="h3">Kaydı sil</h1>
+
+<div class="alert alert-warning">
+    <strong>@Model.EvcilHayvanAdi</strong> (@Model.Tur) ve tüm aşı/randevu geçmişi silinecek. Emin misiniz?
+    <div class="small mt-1">İleri tarihli bir randevusu varsa silme işlemi reddedilir.</div>
+</div>
+
+<form asp-action="Sil" asp-route-id="@Model.EvcilHayvanId" method="post">
+    <button type="submit" class="btn btn-danger">Evet, sil</button>
+    <a asp-action="Detay" asp-route-id="@Model.EvcilHayvanId" class="btn btn-link">Vazgeç</a>
+</form>

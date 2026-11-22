@@ -1,0 +1,42 @@
+@model List<Randevu>
+@{
+    var sahipGoster = !User.IsInRole(Roller.Uye);
+}
+@if (Model.Count == 0)
+{
+    <p class="text-muted">Gösterilecek randevu yok.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Tarih / Saat</th>
+                    <th>Evcil hayvan</th>
+                    @if (sahipGoster) { <th>Sahibi</th> }
+                    <th>Hizmet</th>
+                    <th>Hekim</th>
+                    <th class="text-end">Ücret</th>
+                    <th>Durum</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap">@r.Baslangic.ToString("dd.MM.yyyy ddd") <strong>@r.Baslangic.ToString("HH:mm")</strong>–@r.Bitis.ToString("HH:mm")</td>
+                        <td>@r.EvcilHayvan.EvcilHayvanAdi <span class="text-muted small">(@r.EvcilHayvan.Tur)</span></td>
+                        @if (sahipGoster) { <td>@r.EvcilHayvan.Sahip.AdSoyad</td> }
+                        <td>@r.Hizmet.HizmetAdi</td>
+                        <td>@r.Veteriner.VeterinerAdSoyad</td>
+                        <td class="text-end text-nowrap">@r.Ucret.ToString("N2") ₺</td>
+                        <td><partial name="_DurumRozeti" model="r.Durum" /></td>
+                        <td class="text-end"><a asp-controller="Randevu" asp-action="Detay" asp-route-id="@r.RandevuId" class="btn btn-sm btn-outline-secondary">Detay</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

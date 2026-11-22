@@ -1,0 +1,14 @@
+@model HizmetFormVM
+
+<h1 class="h3">Hizmet düzenle</h1>
+
+@* Id formda gizli alan DEĞİL, adreste: /Hizmet/Duzenle/3 *@
+<form asp-action="Duzenle" asp-route-id="@ViewContext.RouteData.Values["id"]" method="post" class="col-lg-6">
+    <partial name="_HizmetForm" model="Model" />
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-link">Vazgeç</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,113 @@
+@model Veteriner
+@{
+    var admin = User.IsInRole(Roller.Admin);
+    var araliklar = Model.Musaitlikler.OrderBy(m => ((int)m.Gun + 6) % 7).ThenBy(m => m.Baslangic).ToList();
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3 mb-0">Vet. Hek. @Model.VeterinerAdSoyad</h1>
+        <p class="text-klinik mb-0">@Model.UzmanAlani</p>
+    </div>
+    @if (admin)
+    {
+        <div>
+            <a asp-action="Duzenle" asp-route-id="@Model.VeterinerId" class="btn btn-outline-secondary">Düzenle</a>
+            <a asp-action="Sil" asp-route-id="@Model.VeterinerId" class="btn btn-outline-danger">Sil</a>
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <h2 class="h5">Verebildiği hizmetler</h2>
+        @if (Model.Hizmetler.Count == 0)
+        {
+            <p class="text-muted">Henüz hizmet atanmadı.</p>
+        }
+        else
+        {
+            <ul class="list-group mb-3">
+                @foreach (var h in Model.Hizmetler.OrderBy(h => h.HizmetAdi))
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@h.HizmetAdi</span>
+                        <span class="text-muted small">@h.SureDakika dk · @h.Ucret.ToString("N2") ₺</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="col-lg-7">
+        <h2 class="h5">Çalışma saatleri</h2>
+        @if (araliklar.Count == 0)
+        {
+            <p class="text-muted">Tanımlı çalışma saati yok; bu hekime randevu alınamaz.</p>
+        }
+        else
+        {
+            <table class="table table-sm align-middle">
+                <thead><tr><th>Gün</th><th>Başlangıç</th><th>Bitiş</th>@if (admin) { <th></th> }</tr></thead>
+                <tbody>
+                    @foreach (var m in araliklar)
+                    {
+                        <tr>
+                            <td>@GunAdlari.Ad(m.Gun)</td>
+                            <td>@m.Baslangic.ToString("HH:mm")</td>
+                            <td>@m.Bitis.ToString("HH:mm")</td>
+                            @if (admin)
+                            {
+                                <td class="text-end">
+                                    <form asp-action="MusaitlikSil" asp-route-id="@m.MusaitlikId" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (admin)
+        {
+            <div class="card bg-light border-0">
+                <div class="card-body">
+                    <h3 class="h6">Çalışma aralığı ekle</h3>
+                    <form asp-action="MusaitlikEkle" asp-route-id="@Model.VeterinerId" method="post" class="row g-2 align-items-end">
+                        <div class="col-sm-4">
+                            <label class="form-label small" for="Gun">Gün</label>
+                            <select name="Gun" id="Gun" class="form-select" required>
+                                <option value="">— seçin —</option>
+                                @foreach (var g in GunAdlari.HaftaSirasi)
+                                {
+                                    <option value="@((int)g)">@GunAdlari.Ad(g)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small" for="Baslangic">Başlangıç</label>
+                            <input type="time" name="Baslangic" id="Baslangic" class="form-control" value="09:00" required />
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small" for="Bitis">Bitiş</label>
+                            <input type="time" name="Bitis" id="Bitis" class="form-control" value="17:00" required />
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="submit" class="btn btn-primary w-100">Ekle</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<p class="mt-4">
+    @if (User.IsInRole(Roller.Uye))
+    {
+        <a asp-controller="Randevu" asp-action="Al" class="btn btn-primary">Randevu al</a>
+    }
+    <a asp-action="Index" class="btn btn-link">← Tüm hekimler</a>
+</p>

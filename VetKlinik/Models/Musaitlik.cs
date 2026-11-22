@@ -1,15 +1,15 @@
-﻿namespace VetKlinik.Models
+namespace VetKlinik.Models
 {
+    // Hekimin haftanın bir günündeki çalışma aralığı. Örn: Pazartesi 09:00–17:00
+    // Randevu yalnızca bu aralıklara alınabilir.
     public class Musaitlik
     {
         public int MusaitlikId { get; set; }
-
         public int VeterinerId { get; set; }
+        public DayOfWeek Gun { get; set; }
+        public TimeOnly Baslangic { get; set; }
+        public TimeOnly Bitis { get; set; }
 
-        public DayOfWeek Gun { get; set; }          // Monday, Tuesday...
-
-        public TimeOnly Baslangic { get; set; }     // 09:00
-
-        public TimeOnly Bitis { get; set; }         // 17:00
+        public Veteriner Veteriner { get; set; } = null!;
     }
 }

@@ -1,0 +1,28 @@
+@model List<Randevu>
+@{
+    var secili = ViewData["Durum"] as RandevuDurumu?;
+    var filtreler = new (RandevuDurumu? Durum, string Ad)[]
+    {
+        (null, "Tümü"), (RandevuDurumu.Bekliyor, "Bekliyor"), (RandevuDurumu.Onaylandi, "Onaylandı"),
+        (RandevuDurumu.Tamamlandi, "Tamamlandı"), (RandevuDurumu.Reddedildi, "Reddedildi"), (RandevuDurumu.IptalEdildi, "İptal")
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+    @if (User.IsInRole(Roller.Uye) || User.IsInRole(Roller.Admin))
+    {
+        <a asp-action="Al" class="btn btn-primary">+ Randevu al</a>
+    }
+</div>
+
+<ul class="nav nav-pills mb-3">
+    @foreach (var f in filtreler)
+    {
+        <li class="nav-item">
+            <a class="nav-link @(f.Durum == secili ? "active" : "")" asp-action="Index" asp-route-durum="@f.Durum">@f.Ad</a>
+        </li>
+    }
+</ul>
+
+<partial name="_RandevuTablosu" model="Model" />

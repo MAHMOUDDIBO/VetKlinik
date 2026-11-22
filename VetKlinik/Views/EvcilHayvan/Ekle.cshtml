@@ -1,0 +1,13 @@
+@model EvcilHayvanFormVM
+
+<h1 class="h3">Evcil hayvan ekle</h1>
+
+<form asp-action="Ekle" method="post" class="col-lg-7">
+    <partial name="_EvcilHayvanForm" model="Model" />
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-link">Vazgeç</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

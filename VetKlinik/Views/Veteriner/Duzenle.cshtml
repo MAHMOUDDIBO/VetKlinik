@@ -1,0 +1,14 @@
+@model VeterinerFormVM
+
+<h1 class="h3">Hekim düzenle</h1>
+
+<form asp-action="Duzenle" asp-route-id="@ViewContext.RouteData.Values["id"]" method="post" class="col-lg-7">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+    <partial name="_VeterinerForm" model="Model" />
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Detay" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-link">Vazgeç</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,68 @@
+@model Kullanici
+@{
+    var roller = (IList<string>)ViewData["Roller"]!;
+    var yeniAnahtar = TempData["YeniAnahtar"] as string;
+    var mcpAdresi = $"http://{Context.Request.Host.Host}:{{http-portu}}/mcp";
+}
+
+<h1 class="h3 mb-4">Profil</h1>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Ad Soyad</dt><dd class="col-sm-8">@Model.AdSoyad</dd>
+                    <dt class="col-sm-4">E-posta</dt><dd class="col-sm-8">@Model.Email</dd>
+                    <dt class="col-sm-4">Rol</dt><dd class="col-sm-8">@string.Join(", ", roller)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">Yapay zekâ asistanı (MCP) erişim anahtarı</h2>
+                <p class="text-muted small">
+                    Claude Desktop, VS Code veya MCP Inspector gibi bir asistan bu anahtarla <code>/mcp</code> ucuna bağlanır
+                    ve <strong>yalnızca sizin</strong> verilerinize erişir. Aynı anahtar REST API için de geçerlidir.
+                </p>
+
+                @if (yeniAnahtar is not null)
+                {
+                    <div class="alert alert-warning">
+                        <strong>Anahtarınız (yalnızca şimdi gösteriliyor, kopyalayın):</strong>
+                        <pre class="mb-2 mt-2 user-select-all"><code>@yeniAnahtar</code></pre>
+                        <div class="small">MCP istemcisinde başlık olarak: <code>Authorization: Bearer @yeniAnahtar</code></div>
+                    </div>
+                }
+                else if (Model.ApiAnahtariOzeti is not null)
+                {
+                    <p class="mb-3">✅ Etkin bir anahtarınız var. Kaybettiyseniz yenisini oluşturun (eskisi geçersiz olur).</p>
+                }
+                else
+                {
+                    <p class="mb-3">Henüz anahtar oluşturmadınız.</p>
+                }
+
+                <div class="d-flex gap-2">
+                    <form asp-action="AnahtarOlustur" method="post">
+                        <button type="submit" class="btn btn-primary">@(Model.ApiAnahtariOzeti is null ? "Anahtar oluştur" : "Yeni anahtar oluştur")</button>
+                    </form>
+                    @if (Model.ApiAnahtariOzeti is not null)
+                    {
+                        <form asp-action="AnahtarSil" method="post">
+                            <button type="submit" class="btn btn-outline-danger">Anahtarı iptal et</button>
+                        </form>
+                    }
+                </div>
+
+                <hr />
+                <p class="small text-muted mb-1">MCP sunucu adresi (Streamable HTTP):</p>
+                <code class="small">@mcpAdresi</code>
+                <p class="small text-muted mt-1 mb-0">Port numarası <code>Properties/launchSettings.json</code> içindeki "http" profilindedir.</p>
+            </div>
+        </div>
+    </div>
+</div>

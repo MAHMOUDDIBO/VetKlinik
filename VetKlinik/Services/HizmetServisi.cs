@@ -1,62 +1,64 @@
-﻿using VetKlinik.Data;
+using Microsoft.EntityFrameworkCore;
+using VetKlinik.Data;
 using VetKlinik.Models;
 
 namespace VetKlinik.Services
 {
-    // Sözleşmenin bellek içi uygulaması: NASIL yapılır?
-    // EF Core haftasında yalnızca bu sınıfın içi değişecek.
     public class HizmetServisi : IHizmetServisi
     {
-        public List<Hizmet> Listele()
+        private readonly UygulamaDbContext _db;
+
+        public HizmetServisi(UygulamaDbContext db)
         {
-            return KlinikDeposu.Hizmetler.OrderBy(h => h.HizmetAdi).ToList();
+            _db = db;
         }
 
-        public Hizmet? Getir(int id)
+        public Task<List<Hizmet>> ListeleAsync() =>
+            _db.Hizmetler.AsNoTracking().OrderBy(h => h.HizmetAdi).ToListAsync();
+
+        public Task<Hizmet?> GetirAsync(int id) =>
+            _db.Hizmetler.Include(h => h.Veterinerler).AsNoTracking()
+                .FirstOrDefaultAsync(h => h.HizmetId == id);
+
+        // İş kuralı: aynı adda iki hizmet olamaz (büyük/küçük harf ve Türkçe İ/ı duyarsız).
+        // SQLite'ın lower() fonksiyonu Türkçe harfleri bilmediği için karşılaştırma bellekte.
+        public async Task<bool> AyniAdVarMiAsync(string hizmetAdi, int haricId = 0)
         {
-            return KlinikDeposu.Hizmetler.FirstOrDefault(h => h.HizmetId == id);
+            var adlar = await _db.Hizmetler.Where(h => h.HizmetId != haricId)
+                .Select(h => h.HizmetAdi).ToListAsync();
+            return adlar.Any(a => string.Equals(a.Trim(), hizmetAdi.Trim(),
+                StringComparison.CurrentCultureIgnoreCase));
         }
 
-        public void Ekle(Hizmet hizmet)
+        public async Task EkleAsync(Hizmet hizmet)
         {
-            // Id'yi kullanıcı değil, sunucu belirler
-            hizmet.HizmetId = KlinikDeposu.Hizmetler.Count == 0
-                ? 1
-                : KlinikDeposu.Hizmetler.Max(h => h.HizmetId) + 1;
-
-            KlinikDeposu.Hizmetler.Add(hizmet);
+            _db.Hizmetler.Add(hizmet);
+            await _db.SaveChangesAsync();   // HizmetId'yi veritabanı verir
         }
 
-        public bool Guncelle(Hizmet hizmet)
+        public async Task<bool> GuncelleAsync(Hizmet hizmet)
         {
-            var mevcut = Getir(hizmet.HizmetId);
-            if (mevcut is null)
-                return false;
+            var mevcut = await _db.Hizmetler.FindAsync(hizmet.HizmetId);
+            if (mevcut is null) return false;
 
             mevcut.HizmetAdi = hizmet.HizmetAdi;
             mevcut.SureDakika = hizmet.SureDakika;
             mevcut.Ucret = hizmet.Ucret;
+            await _db.SaveChangesAsync();
             return true;
         }
 
-        public bool Sil(int id)
+        public async Task<IslemSonucu> SilAsync(int id)
         {
-            var hizmet = Getir(id);
-            if (hizmet is null)
-                return false;
+            var hizmet = await _db.Hizmetler.FindAsync(id);
+            if (hizmet is null) return IslemSonucu.Yok();
 
-            KlinikDeposu.Hizmetler.Remove(hizmet);
-            return true;
-        }
+            if (await _db.Randevular.AnyAsync(r => r.HizmetId == id))
+                return IslemSonucu.Hatali("Bu hizmete ait randevular olduğu için silinemez.");
 
-        // İş kuralı: aynı adda iki hizmet olamaz.
-        // haricId: düzenlemede kaydın kendi adı "tekrar" sayılmasın diye.
-        public bool AyniAdVarMi(string hizmetAdi, int haricId = 0)
-        {
-            return KlinikDeposu.Hizmetler.Any(h =>
-                h.HizmetId != haricId &&
-                string.Equals(h.HizmetAdi.Trim(), hizmetAdi.Trim(),
-                    StringComparison.CurrentCultureIgnoreCase));
+            _db.Hizmetler.Remove(hizmet);
+            await _db.SaveChangesAsync();
+            return IslemSonucu.Tamam();
         }
     }
 }

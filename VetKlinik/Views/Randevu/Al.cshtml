@@ -1,0 +1,54 @@
+@model RandevuFormVM
+@{
+    var randevuId = ViewData["RandevuId"] as int?;
+    var duzenleme = randevuId is not null;
+}
+
+<h1 class="h3">@(duzenleme ? "Randevuyu değiştir" : "Randevu al")</h1>
+<p class="text-muted">Evcil hayvanınızı, hizmeti ve günü seçin; o gün boş olan hekimler ve saatler listelenir.
+    Hizmet süresi hesaba katılır: yalnızca tamamen boş aralıklar önerilir.</p>
+
+<form asp-action="@(duzenleme ? "Duzenle" : "Al")" asp-route-id="@randevuId" method="post" id="randevuFormu" class="col-lg-9">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="EvcilHayvanId" class="form-label"></label>
+            <select asp-for="EvcilHayvanId" asp-items="@((Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewData["Hayvanlar"]!)" class="form-select">
+                <option value="">— seçin —</option>
+            </select>
+            <span asp-validation-for="EvcilHayvanId" class="small"></span>
+        </div>
+        <div class="col-md-5 mb-3">
+            <label asp-for="HizmetId" class="form-label"></label>
+            <select asp-for="HizmetId" asp-items="@((Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewData["Hizmetler"]!)" class="form-select">
+                <option value="">— seçin —</option>
+            </select>
+            <span asp-validation-for="HizmetId" class="small"></span>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Tarih" class="form-label"></label>
+            <input asp-for="Tarih" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="Tarih" class="small"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hekim ve saat</label>
+        @* Seçenekler /api/veterinerler/uygun ucundan jQuery ile gelir (wwwroot/js/randevu-al.js) *@
+        <div id="uygunSaatler" class="border rounded p-3 bg-light" data-secili="@Model.Secim">
+            <span class="text-muted">Hizmet ve tarih seçin.</span>
+        </div>
+        @* Gizli alan; doğrulama mesajı buraya bağlı. ignore: [] ile gizli alan da doğrulanır (randevu-al.js) *@
+        <input type="hidden" asp-for="Secim" />
+        <span asp-validation-for="Secim" class="small"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">@(duzenleme ? "Değişikliği kaydet" : "Randevu talebi oluştur")</button>
+    <a asp-action="@(duzenleme ? "Detay" : "Index")" asp-route-id="@randevuId" class="btn btn-link">Vazgeç</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/randevu-al.js" asp-append-version="true"></script>
+}
